@@ -1,7 +1,7 @@
 import { StatusBar } from "expo-status-bar";
 import { Button, StyleSheet, Text, View, Image } from "react-native";
 
-import { auth, db, storage } from "./firebase";
+import { auth, db, storage, functions } from "./firebase";
 import { signInAnonymously, onAuthStateChanged, signOut } from "firebase/auth";
 import {
   addDoc,
@@ -17,6 +17,7 @@ import {
   uploadBytesResumable,
   getDownloadURL,
 } from "firebase/storage";
+import { httpsCallable } from "firebase/functions";
 
 import { useEffect, useState } from "react";
 
@@ -95,6 +96,12 @@ export default function App() {
     setImageUrl(newUrl);
   };
 
+  const callFunction = async () => {
+    const sayHello = httpsCallable(functions, "sayHello");
+    const result = await sayHello({ text: "john doe" });
+    console.info("sayHello", { result });
+  };
+
   return (
     <View style={styles.container}>
       {user ? (
@@ -125,6 +132,9 @@ export default function App() {
               />
             ) : null}
             {/* {imageUrl ? <Image style={styles.image} source={imageUrl} /> : null} */}
+          </View>
+          <View>
+            <Button title="Call function" onPress={callFunction} />
           </View>
         </View>
       ) : null}
