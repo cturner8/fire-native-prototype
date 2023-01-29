@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { Button, StyleSheet, Text, View } from "react-native";
+import { Button, StyleSheet, Text, View, Image } from "react-native";
 
 import { auth, db, storage } from "./firebase";
 import { signInAnonymously, onAuthStateChanged, signOut } from "firebase/auth";
@@ -24,6 +24,7 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [records, setRecords] = useState(0);
   const [url, setUrl] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, setUser);
@@ -87,6 +88,13 @@ export default function App() {
     setUrl(newUrl);
   };
 
+  const getFileUrl = async () => {
+    const storageRef = ref(storage, "dog.jpg");
+    const newUrl = await getDownloadURL(storageRef);
+    console.info({ newUrl });
+    setImageUrl(newUrl);
+  };
+
   return (
     <View style={styles.container}>
       {user ? (
@@ -103,6 +111,20 @@ export default function App() {
           <View>
             <Button title="Add storage data URL" onPress={addDataUrlFile} />
             <Text>Download URL: {url}</Text>
+            <Button title="Get image URL" onPress={getFileUrl} />
+            {imageUrl ? (
+              <Image
+                style={styles.image}
+                source={{ uri: imageUrl }}
+                onError={(error) => {
+                  console.info({ error });
+                }}
+                onLoad={(e) => {
+                  console.info({ e });
+                }}
+              />
+            ) : null}
+            {/* {imageUrl ? <Image style={styles.image} source={imageUrl} /> : null} */}
           </View>
         </View>
       ) : null}
@@ -118,5 +140,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     // justifyContent: "center",
     paddingTop: 50,
+  },
+  image: {
+    width: 50,
+    height: 50,
   },
 });
